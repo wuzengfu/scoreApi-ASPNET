@@ -24,7 +24,8 @@ namespace score_api.Controllers
             {
                 Name = score.Name,
                 Module = score.Module,
-                Mark = score.Mark
+                Mark = score.Mark,
+                CreatedAt = DateTime.Now
             };
 
             if (score.Mark < 0 || score.Mark > 100)
