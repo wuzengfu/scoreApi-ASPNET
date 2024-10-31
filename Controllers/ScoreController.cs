@@ -76,6 +76,24 @@ namespace score_api.Controllers
             return Ok(scoreSchema.Id + " has been removed!");
         }
 
+        [HttpPut]
+        [Route("{id}")]
+        public IActionResult UpdateScoreById(int id, Score score)
+        {
+            Score? scoreSchema = _context.Scores.Find(id);
+            if (scoreSchema == null)
+            {
+                return NotFound("Score with id " + id + " not found");
+            }
+            
+            scoreSchema.Name = score.Name;
+            scoreSchema.Mark = score.Mark;
+            scoreSchema.Module = score.Module;
+
+            _context.SaveChanges();
+            return NoContent();
+        }
+
         [HttpGet]
         [Route("{name}")]
         public IActionResult GetScoreByName(string name)
@@ -104,7 +122,7 @@ namespace score_api.Controllers
 
             if (result.Count == 0)
             {
-                return NotFound("Not such a module - " + module + " !");
+                return NotFound("No such a module - " + module + " !");
             }
 
             return Ok(result);
