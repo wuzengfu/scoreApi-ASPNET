@@ -12,9 +12,9 @@ namespace score_api.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            IQueryable<Score> result = _context.Scores;
-            var list = result.OrderByDescending(x => x.CreatedAt).ToList();
-            return Ok(list);
+            IQueryable<Score> result = _context.Scores
+                .OrderByDescending(x => x.CreatedAt);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -33,13 +33,13 @@ namespace score_api.Controllers
                 return BadRequest("Score must be between 0 and 100");
             }
 
-            int count = _context.Scores
-                .Where(record => record.Name.Equals(score.Name))
-                .Where(record => record.Module.Equals(score.Module))
-                .Where(record => record.Mark.Equals(score.Mark))
-                .Count();
+            bool hasDuplicateScore = _context.Scores
+                .Any(score1 => score1.Name == score.Name
+                               && score1.Module == score.Module
+                               && score1.Mark == score.Mark
+                );
 
-            if (count > 0)
+            if (hasDuplicateScore)
             {
                 return BadRequest("Already exists!");
             }
@@ -99,9 +99,8 @@ namespace score_api.Controllers
         [Route("{name}")]
         public IActionResult GetScoreByName(string name)
         {
-            List<Score> result = _context.Scores
-                .Where(scoreSchema => scoreSchema.Name.ToLower().Equals(name.ToLower()))
-                .ToList();
+            IQueryable<Score> result = _context.Scores
+                .Where(scoreSchema => scoreSchema.Name.ToLower().Equals(name.ToLower()));
             return Ok(result);
         }
 
@@ -118,10 +117,9 @@ namespace score_api.Controllers
                 .Where(score => score.Module.Equals(module))
                 .Where(score => score.Mark >= 80)
                 .Select(score => new { score.Name, score.Mark })
-                .OrderByDescending(score => score.Mark)
-                .ToList();
+                .OrderByDescending(score => score.Mark);
 
-            if (result.Count == 0)
+            if (result.Count() == 0)
             {
                 return NotFound("No such a module - " + module + " !");
             }
